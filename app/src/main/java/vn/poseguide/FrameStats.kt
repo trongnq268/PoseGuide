@@ -80,8 +80,8 @@ data class FrameStats(val brightness: FloatArray, val texture: FloatArray) {
                         else -> x.toFloat() / w
                     }
                     val col = (ux * 3).toInt().coerceIn(0, 2)
-                    bSum[col] += v
-                    tSum[col] += abs(v - vr)
+                    bSum[col] += v.toFloat()
+                    tSum[col] += abs(v - vr).toFloat()
                     n[col]++
                     x += STEP
                 }
