@@ -14,17 +14,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- Thanh trên: cảnh nhận diện được -->
+    <!-- Thanh trên: cảnh + vật thể + ánh sáng nhận diện được -->
     <TextView
         android:id="@+id/sceneText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|center_horizontal"
+        android:layout_marginHorizontal="16dp"
         android:layout_marginTop="40dp"
         android:background="#88000000"
+        android:gravity="center"
         android:paddingHorizontal="14dp"
         android:paddingVertical="6dp"
-        android:text="Đang nhận diện cảnh..."
+        android:text="Đang quét bối cảnh..."
         android:textColor="#FFFFFF"
         android:textSize="14sp" />
 
@@ -33,21 +35,46 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:background="#88000000"
+        android:background="#99000000"
         android:orientation="vertical"
         android:paddingHorizontal="12dp"
         android:paddingTop="8dp"
-        android:paddingBottom="24dp">
+        android:paddingBottom="20dp">
 
-        <TextView
-            android:id="@+id/hintText"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/hintText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/scoreText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/angleText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
             android:gravity="center"
-            android:text=""
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textColor="#FFC107"
+            android:textSize="14sp" />
 
         <TextView
             android:id="@+id/tipText"
@@ -58,6 +85,20 @@
             android:textColor="#DDDDDD"
             android:textSize="13sp" />
 
+        <!-- 3–5 thẻ gợi ý dáng -->
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:id="@+id/cardRow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" />
+        </HorizontalScrollView>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -66,55 +107,18 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/prevBtn"
-                android:layout_width="56dp"
-                android:layout_height="wrap_content"
-                android:text="◀" />
-
-            <TextView
-                android:id="@+id/poseName"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:textColor="#FFFFFF"
-                android:textSize="15sp" />
-
-            <TextView
-                android:id="@+id/scoreText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:textColor="#FFFFFF"
-                android:textSize="15sp"
-                android:textStyle="bold" />
-
-            <Button
-                android:id="@+id/nextBtn"
-                android:layout_width="56dp"
-                android:layout_height="wrap_content"
-                android:text="▶" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <Button
                 android:id="@+id/autoBtn"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Tự chụp: TẮT" />
+                android:text="Tự chụp: TẮT"
+                android:textSize="12sp" />
 
             <Button
                 android:id="@+id/shutterBtn"
                 android:layout_width="0dp"
                 android:layout_height="64dp"
-                android:layout_marginHorizontal="8dp"
+                android:layout_marginHorizontal="6dp"
                 android:layout_weight="1"
                 android:text="CHỤP"
                 android:textStyle="bold" />
@@ -124,7 +128,17 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Đổi bên ⇆" />
+                android:text="Đổi bên ⇆"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/cameraBtn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:layout_weight="1"
+                android:text="Cam ⟲"
+                android:textSize="12sp" />
         </LinearLayout>
     </LinearLayout>
 </FrameLayout>

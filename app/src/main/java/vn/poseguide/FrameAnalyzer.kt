@@ -14,14 +14,23 @@ import com.google.mlkit.vision.pose.Pose
 import com.google.mlkit.vision.pose.PoseDetection
 import com.google.mlkit.vision.pose.defaults.PoseDetectorOptions
 
+/** Kết quả phân tích một khung hình. labels/stats chỉ có khoảng mỗi 500 ms, các khung khác là null. */
+class FrameResult(
+    val pose: Pose?,
+    val imageWidth: Int,
+    val imageHeight: Int,
+    val labels: List<ImageLabel>?,
+    val stats: FrameStats?,
+)
+
 /**
  * Phân tích từng khung hình camera, hoàn toàn trên máy:
  *  - nhận diện khung xương người (mỗi khung hình)
- *  - nhận diện cảnh (khoảng 1 lần/giây cho nhẹ máy)
+ *  - nhận diện cảnh/vật thể + đo ánh sáng, độ chi tiết nền (mỗi 500 ms cho nhẹ máy)
  * Kết quả trả về trên luồng chính (main thread).
  */
 class FrameAnalyzer(
-    private val onResult: (pose: Pose?, imageWidth: Int, imageHeight: Int, labels: List<ImageLabel>?) -> Unit,
+    private val onResult: (FrameResult) -> Unit,
 ) : ImageAnalysis.Analyzer {
 
     private val poseDetector = PoseDetection.getClient(
@@ -30,9 +39,9 @@ class FrameAnalyzer(
             .build()
     )
     private val labeler = ImageLabeling.getClient(
-        ImageLabelerOptions.Builder().setConfidenceThreshold(0.55f).build()
+        ImageLabelerOptions.Builder().setConfidenceThreshold(0.5f).build()
     )
-    private var lastLabelTime = 0L
+    private var lastSceneTime = 0L
 
     @androidx.annotation.OptIn(ExperimentalGetImage::class)
     override fun analyze(proxy: ImageProxy) {
@@ -49,26 +58,36 @@ class FrameAnalyzer(
 
         val poseTask: Task<Pose> = poseDetector.process(input)
         val now = SystemClock.elapsedRealtime()
-        val labelTask: Task<List<ImageLabel>>? =
-            if (now - lastLabelTime > 1000) {
-                lastLabelTime = now
-                labeler.process(input)
-            } else null
+        val sceneFrame = now - lastSceneTime >= SCENE_INTERVAL_MS
+        if (sceneFrame) lastSceneTime = now
+        val labelTask: Task<List<ImageLabel>>? = if (sceneFrame) labeler.process(input) else null
+        val stats: FrameStats? = if (sceneFrame) safeStats(media, rotation) else null
 
         val tasks = listOfNotNull<Task<*>>(poseTask, labelTask)
         Tasks.whenAllComplete(tasks).addOnCompleteListener {
             val pose = if (poseTask.isSuccessful) poseTask.result else null
-            val labels = labelTask?.let { if (it.isSuccessful) it.result else null }
+            val labels = labelTask?.let { t -> if (t.isSuccessful) t.result else null }
             try {
-                onResult(pose, w, h, labels)
+                onResult(FrameResult(pose, w, h, labels, stats))
             } finally {
                 proxy.close()
             }
         }
     }
 
+    private fun safeStats(media: android.media.Image, rotation: Int): FrameStats? =
+        try {
+            FrameStats.compute(media, rotation)
+        } catch (e: Exception) {
+            null
+        }
+
     fun close() {
         poseDetector.close()
         labeler.close()
+    }
+
+    companion object {
+        const val SCENE_INTERVAL_MS = 500L
     }
 }
